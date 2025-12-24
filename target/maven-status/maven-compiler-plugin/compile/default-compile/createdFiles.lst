@@ -1,0 +1,17 @@
+com\svs\model\Arc.class
+com\svs\model\Transition.class
+com\svs\dto\TransitionDTO.class
+com\svs\ui\PetriNetEditorApp.class
+com\svs\dto\ArcDTO.class
+com\svs\model\PetriNet.class
+com\svs\model\PetriNetBuilder.class
+com\svs\ui\nodes\ArcLine.class
+com\svs\dto\NetDTO.class
+com\svs\model\Marking.class
+com\svs\model\Place.class
+com\svs\ui\nodes\TransitionNode.class
+com\svs\ui\controller\EditorController.class
+com\svs\ui\controller\PopupInitMarkingController.class
+com\svs\App.class
+com\svs\ui\nodes\PlaceNode.class
+com\svs\dto\PlaceDTO.class
