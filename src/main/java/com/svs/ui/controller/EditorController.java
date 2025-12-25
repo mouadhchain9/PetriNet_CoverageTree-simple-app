@@ -1,6 +1,8 @@
 package com.svs.ui.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.Node;
@@ -12,6 +14,7 @@ import javafx.stage.Stage;
 import javafx.stage.Modality;
 import javafx.stage.FileChooser;
 import javafx.animation.PathTransition;
+
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -199,12 +202,27 @@ public class EditorController {
             isPre = false;    // Transition → Place means post arc
         }
 
-        // Update Petri net model
-        int weight = 1;
+        // Update Petri net model (edited for weight setting)
+        // int weight = 1;
+        // if (isPre)
+        //     tNode.getTransition().addPreArc(pNode.getPlace(), weight);
+        // else
+        //     tNode.getTransition().addPostArc(pNode.getPlace(), weight);
+        Integer weight = showArcWeightDialog();
+        if (weight == null) {
+            simulationStatus.setText("Arc creation cancelled");
+            linkStartNode = null;
+            linkingMode = false;
+            btnLink.setStyle("");
+            canvas.setCursor(Cursor.DEFAULT);
+            return;
+        }
+
         if (isPre)
             tNode.getTransition().addPreArc(pNode.getPlace(), weight);
         else
             tNode.getTransition().addPostArc(pNode.getPlace(), weight);
+        
 
         // Draw arc visually
         ArcLine arcLine;
@@ -214,6 +232,7 @@ public class EditorController {
             arcLine = new ArcLine(tNode, pNode); // Transition → Place
         }
 
+        arcLine.setWeight(weight);
         canvas.getChildren().add(arcLine);
         arcs.add(arcLine);
 
@@ -227,6 +246,36 @@ public class EditorController {
         canvas.setCursor(Cursor.DEFAULT);
     }
 
+
+    // ------------------------------------------------------------
+    // wewight setting popup
+    // ------------------------------------------------------------
+    private Integer showArcWeightDialog() {
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/arc_weight_popup.fxml")
+            );
+
+            Parent root = loader.load();
+
+            ArcWeightPopupController controller = loader.getController();
+
+            Stage dialog = new Stage();
+            controller.setStage(dialog);
+
+            dialog.setTitle("Set Arc Weight");
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setScene(new Scene(root));
+            dialog.showAndWait();
+
+            return controller.getResult();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     // ------------------------------------------------------------
     // Enable dragging + linking clicks on each node
@@ -642,9 +691,9 @@ public class EditorController {
         }
 
         try {
-            javafx.fxml.FXMLLoader loader =
-                    new javafx.fxml.FXMLLoader(getClass().getResource("/popup_init_marking.fxml"));
-            javafx.scene.Parent root = loader.load();
+            FXMLLoader loader =
+                    new FXMLLoader(getClass().getResource("/popup_init_marking.fxml"));
+            Parent root = loader.load();
 
             PopupInitMarkingController popup = loader.getController();
             popup.setNet(net);

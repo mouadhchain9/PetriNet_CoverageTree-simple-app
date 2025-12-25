@@ -1,10 +1,12 @@
 package com.svs.ui.nodes;
 
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line; 
 import javafx.scene.shape.Polygon;
-import javafx.scene.Node;
+import javafx.scene.text.Text;
+
 
 
 public class ArcLine extends Group {
@@ -14,6 +16,8 @@ public class ArcLine extends Group {
 
     private final Node sourceNode;
     private final Node targetNode;
+    private int weight = 1;
+    private Text weightLabel = new Text("1");
 
     public ArcLine(Node source, Node target) {
         this.sourceNode = source;
@@ -52,6 +56,21 @@ public class ArcLine extends Group {
     }
     
     ///--
+    // added for weight setting function
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+        updateLabel();
+    }
+    private void updateLabel() {
+        weightLabel.setText(String.valueOf(weight));
+        weightLabel.setX((getStartX() + getEndX()) / 2);
+        weightLabel.setY((getStartY() + getEndY()) / 2);
+    }
+
     // ⬅ Fix: correct implementation
     public boolean connects(TransitionNode t) {
         return (sourceNode == t || targetNode == t);
