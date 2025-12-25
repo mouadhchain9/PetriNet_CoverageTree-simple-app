@@ -37,15 +37,47 @@ public class PetriNet {
         System.out.println("]");
     }
 
-    // SIMULATION WITH MARKING
+    // SIMULATION WITH MARKING (edited)
+    // public void runInteractiveSimulation(Marking m0) {
+    //     Scanner sc = new Scanner(System.in);
+
+    //     Marking current = m0;
+
+    //     while (true) {
+    //         printMarking(current);
+
+    //         List<Transition> enabled = getEnabledTransitions(current);
+    //         if (enabled.isEmpty()) {
+    //             System.out.println("No enabled transitions – simulation ends.");
+    //             break;
+    //         }
+
+    //         if (enabled.size() == 1) {
+    //             Transition t = enabled.get(0);
+    //             System.out.println("Enabled: " + t + " (press Enter to fire)");
+    //             sc.nextLine();
+    //             current = t.fire(this, current);
+    //         } else {
+    //             System.out.println("Enabled transitions:");
+    //             for (int i = 0; i < enabled.size(); i++)
+    //                 System.out.println((i + 1) + ". " + enabled.get(i));
+
+    //             System.out.print("Choose transition to fire: ");
+    //             int choice = Integer.parseInt(sc.nextLine());
+    //             Transition chosen = enabled.get(choice - 1);
+    //             current = chosen.fire(this, current);
+    //         }
+
+    //         System.out.println("--------------------------");
+    //     }
+    // }
     public void runInteractiveSimulation(Marking m0) {
         Scanner sc = new Scanner(System.in);
-
         Marking current = m0;
 
         while (true) {
             printMarking(current);
-
+            
             List<Transition> enabled = getEnabledTransitions(current);
             if (enabled.isEmpty()) {
                 System.out.println("No enabled transitions – simulation ends.");
@@ -54,24 +86,48 @@ public class PetriNet {
 
             if (enabled.size() == 1) {
                 Transition t = enabled.get(0);
-                System.out.println("Enabled: " + t + " (press Enter to fire)");
-                sc.nextLine();
+                System.out.println("Enabled: " + t);
+                System.out.println("Press Enter to fire, or type 'q' to quit: ");
+                String input = sc.nextLine();
+                if (input.equalsIgnoreCase("q")) {
+                    System.out.println("Exiting simulation...");
+                    break;
+                }
                 current = t.fire(this, current);
             } else {
                 System.out.println("Enabled transitions:");
-                for (int i = 0; i < enabled.size(); i++)
+                for (int i = 0; i < enabled.size(); i++) {
                     System.out.println((i + 1) + ". " + enabled.get(i));
-
+                }
+                System.out.println("0. Exit simulation");
+                
                 System.out.print("Choose transition to fire: ");
-                int choice = Integer.parseInt(sc.nextLine());
-                Transition chosen = enabled.get(choice - 1);
-                current = chosen.fire(this, current);
+                String input = sc.nextLine();
+                
+                if (input.equalsIgnoreCase("q") || input.equals("0")) {
+                    System.out.println("Exiting simulation...");
+                    break;
+                }
+                
+                try {
+                    int choice = Integer.parseInt(input);
+                    if (choice < 1 || choice > enabled.size()) {
+                        System.out.println("Invalid choice. Try again.");
+                        continue;
+                    }
+                    Transition chosen = enabled.get(choice - 1);
+                    current = chosen.fire(this, current);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please enter a number.");
+                    continue;
+                }
             }
-
+            
             System.out.println("--------------------------");
         }
+        
+        System.out.println("Simulation ended.");
     }
-
     // Remove a Place/Transtion
     public void removePlace(Place p) {
         int idx = places.indexOf(p);

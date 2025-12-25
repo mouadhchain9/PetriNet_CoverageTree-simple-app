@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.svs.coverage.*;
+
 public class PetriNetBuilder {
+
 
     private final PetriNet net = new PetriNet();
     private final Scanner sc = new Scanner(System.in);
+    private Marking initialMarking;
 
     public PetriNet getNet() {
         return net;
@@ -16,46 +20,72 @@ public class PetriNetBuilder {
     public void run() {
         System.out.println("=== Interactive Petri Net Builder ===");
 
-        boolean building = true;
-        while (building) {
+        // boolean building = true; no longer needed in the while loop
+        while (true) {
             System.out.println("\nOptions:");
             System.out.println("1. Add place");
             System.out.println("2. Add transition");
             System.out.println("3. Connect place to transition (pre/post)");
             System.out.println("4. Show current net");
             System.out.println("5. Finish building and start simulation");
+            System.out.println("6. Print Coverage Tree");
+            System.out.println("7. Drop Current Petri net");
+            System.out.println("8. select initial Marking");
             System.out.print("Choose an option: ");
 
-            int choice = readInt(1, 5);
+            int choice = readInt(1, 8);
 
             switch (choice) {
                 case 1 -> addPlaceInteractive();
                 case 2 -> addTransitionInteractive();
                 case 3 -> connectPlaceTransitionInteractive();
                 case 4 -> showNet();
-                case 5 -> building = false;
+                case 5 -> runSimulation();
+                case 6 -> coverageTree();
+                case 7 -> deleteAll();
+                case 8 -> setMarking();
+
             }
         }
+        // -- moved to an independant functions:
+        // // ---------------------------
+        // // Define initial marking
+        // // ---------------------------
+        // // Build a list of token counts
+        // List<Integer> tokenList = new ArrayList<>();
+        // for (Place p : net.getPlaces()) {
+        //     System.out.print("Enter initial tokens for " + p.getName() + ": ");
+        //     int tokens = readInt(0, Integer.MAX_VALUE);
+        //     tokenList.add(tokens);
+        // }
+
+        // // Create marking
+        // initialMarking = new Marking(tokenList, null); // null = no parent
 
         // ---------------------------
-        // Define initial marking
+        // Run interactive simulation
         // ---------------------------
-        // Build a list of token counts
+        // System.out.println("\n=== Starting Interactive Simulation ===");
+        // net.runInteractiveSimulation(initialMarking);
+    }
+
+    private void runSimulation() {
+        if (initialMarking == null) {
+            System.out.println("\nyou need to set an Initial Marking first");
+            return;
+        }
+        System.out.println("\n=== Starting Interactive Simulation ===");
+        net.runInteractiveSimulation(initialMarking);
+    }
+
+    private void setMarking() {
         List<Integer> tokenList = new ArrayList<>();
         for (Place p : net.getPlaces()) {
             System.out.print("Enter initial tokens for " + p.getName() + ": ");
             int tokens = readInt(0, Integer.MAX_VALUE);
             tokenList.add(tokens);
         }
-
-        // Create marking
-        Marking initialMarking = new Marking(tokenList, null); // null = no parent
-
-        // ---------------------------
-        // Run interactive simulation
-        // ---------------------------
-        System.out.println("\n=== Starting Interactive Simulation ===");
-        net.runInteractiveSimulation(initialMarking);
+        initialMarking = new Marking(tokenList, null);
     }
 
     // ---------------------------
@@ -129,6 +159,25 @@ public class PetriNetBuilder {
         for (Transition t : net.getTransitions()) {
             System.out.println("  " + t.getName());
         }
+    }
+
+    // ---------------------------
+    // Coverage Tree call
+    // ---------------------------
+
+    private void coverageTree() {
+        CoverageTreeBuilder builder = new CoverageTreeBuilder(net);
+
+        CoverageTreeNode root = builder.build(initialMarking);
+
+        CoverageTreePrinter.print(root);
+    }
+
+    private void deleteAll() {
+
+        net.clear();
+        net.resetCounters();
+        System.out.println("network deleted ✔");
     }
 
     // ---------------------------
