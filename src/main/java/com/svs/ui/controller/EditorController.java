@@ -520,7 +520,7 @@ public class EditorController {
             ArcDTO a = new ArcDTO();
             a.from = extractId(arc.getSourceNode());
             a.to   = extractId(arc.getTargetNode());
-            a.weight = 1;
+            a.weight = arc.getWeight(); // updated
             dto.arcs.add(a);
         }
 
@@ -572,7 +572,7 @@ public class EditorController {
         // --- Places
         for (PlaceDTO p : dto.places) {
             Place place = new Place();
-            place.setName(p.id);   // ⚠️ add setter if missing
+            place.setName(p.id);
             net.addPlace(place);
 
             PlaceNode pn = new PlaceNode(place);
@@ -613,6 +613,7 @@ public class EditorController {
                 tn.getTransition().addPostArc(pn.getPlace(), a.weight);
 
             ArcLine arc = new ArcLine(src, dst);
+            arc.setWeight(a.weight);
             canvas.getChildren().add(arc);
             arcs.add(arc);
         }

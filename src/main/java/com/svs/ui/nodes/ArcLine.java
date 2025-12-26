@@ -67,6 +67,9 @@ public class ArcLine extends Group {
     }
     private void updateLabel() {
         weightLabel.setText(String.valueOf(weight));
+        if (!"1".equals(weightLabel.getText()))
+            getChildren().add(weightLabel);
+
         weightLabel.setX((getStartX() + getEndX()) / 2);
         weightLabel.setY((getStartY() + getEndY()) / 2);
     }
@@ -103,6 +106,9 @@ public class ArcLine extends Group {
 
         line.setEndX(endX);
         line.setEndY(endY);
+
+        weightLabel.setX((startX + endX) / 2);
+        weightLabel.setY((startY + endY) / 2 - 5);
 
         // Arrowhead geometry
         double arrowLength = 12;
