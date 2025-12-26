@@ -22,6 +22,8 @@ import com.google.gson.GsonBuilder;
 import com.svs.model.*;
 import com.svs.ui.nodes.*;
 import com.svs.dto.*;
+import com.svs.coverage.*;
+import com.svs.coverage.ui.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -42,6 +44,7 @@ public class EditorController {
     @FXML private Button btnLink;
     @FXML private Button btnSimulate;
     @FXML private Button btnSimulateStop;
+    @FXML private Button btnCoverageTree;
 
     @FXML private Pane canvas;
     @FXML private Label simulationStatus;
@@ -92,7 +95,7 @@ public class EditorController {
         btnLoad.setOnAction(e -> loadFromFile());
         btnAddPlace.setOnAction(e -> addPlaceNode());
         btnAddTransition.setOnAction(e -> addTransitionNode());
-
+        btnCoverageTree.setOnAction(e -> coverageTree());
         btnLink.setOnAction(e -> {
             linkingMode = !linkingMode;
 
@@ -667,30 +670,9 @@ public class EditorController {
     // Marking popup
     // ------------------------------------------------------------
     private void openMarkingPopup() {
-        if (net.getPlaces().size()==0 ||
-            net.getTransitions().size()==0) {
-            simulationStatus.setText("Your graph is incomplete!!");
+        if (!graphCheck()){
             return;
         }
-
-        // if (arcs.size()==0) {
-        //     // needs a more thoughrout validation
-        //     simulationStatus.setText("your graph is not fully connected!!");
-
-        //     return;
-        // }
-        // more detailed validation --> 
-        for (Node n : canvas.getChildren()) {
-            if (n instanceof TransitionNode tn) {
-                int pre = tn.getTransition().getPre().size();
-                int post = tn.getTransition().getPost().size();
-                if(pre == 0 || post == 0){
-                    simulationStatus.setText("your graph is not fully connected!!");
-                    return;
-                }
-            }
-        }
-
         try {
             FXMLLoader loader =
                     new FXMLLoader(getClass().getResource("/popup_init_marking.fxml"));
@@ -785,5 +767,72 @@ public class EditorController {
             }
         }
     }
+
+
+    // ------------------------------------------------------------
+    // Coveragge Tree Call 
+    // ------------------------------------------------------------
+
+    private void coverageTree() {
+
+        if(!graphCheck())
+            return;
+        CoverageTreeBuilder builder = new CoverageTreeBuilder(net);
+        try {
+            FXMLLoader loader =
+                    new FXMLLoader(getClass().getResource("/popup_init_marking.fxml"));
+            Parent root = loader.load();
+
+            PopupInitMarkingController popup = loader.getController();
+            popup.setNet(net);
+
+            Stage dialog = new Stage();
+            popup.setStage(dialog);
+
+            dialog.setTitle("Initial Marking");
+            dialog.setScene(new Scene(root));
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.showAndWait();
+
+            currentMarking = popup.getResultMarking();
+            if (currentMarking != null) {
+                simulationStatus.setText("Coverage Tree ✔");
+            } else {
+                simulationStatus.setText("Canceled X");
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        CoverageTreeNode root = builder.build(currentMarking);
+
+        CoverageTreeRenderer renderer = new CoverageTreeRenderer();
+        Pane treePane = renderer.render(root);
+
+        Stage stage = new Stage();
+        stage.setTitle("Coverage Tree");
+        stage.setScene(new Scene(new ScrollPane(treePane), 800, 600));
+        stage.show();
+    }
+    private boolean graphCheck() {
+        if (net.getPlaces().size()==0 ||
+            net.getTransitions().size()==0) {
+            simulationStatus.setText("Your graph is incomplete!!");
+            return false;
+        }
+
+        for (Node n : canvas.getChildren()) {
+            if (n instanceof TransitionNode tn) {
+                int pre = tn.getTransition().getPre().size();
+                int post = tn.getTransition().getPost().size();
+                if(pre == 0 || post == 0){
+                    simulationStatus.setText("your graph is not fully connected!!");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
 }

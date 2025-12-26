@@ -17,6 +17,7 @@
             <Button fx:id="btnLink" text="Linkage"/>
             <Button fx:id="btnSimulate" text="Start Simulation"/>
             <Button fx:id="btnSimulateStop" text="Stop Simulation"/>
+            <Button fx:id="btnCoverageTree" text="Draw Tree"/>
             <Button fx:id="btnDeleteNode" text="Delete Node"/>
             <Button fx:id="btnDeleteAll" text="Delete All"/>
         </ToolBar>
